@@ -1,48 +1,71 @@
-# ByteFlow
+<div align="center">
+  <img src="Assets/byteflow-v2.png" alt="ByteFlow" width="104" />
+  <h1>ByteFlow</h1>
+  <p>看清哪个应用在用网，一键决定它能否联网。</p>
+  <p>A Windows network monitor with per-app internet controls.</p>
+  <p><a href="https://github.com/hxmsuper/ByteFlow/releases/latest">下载 Windows 版</a> · <a href="#快速开始">快速开始</a> · <a href="#从源码构建">从源码构建</a></p>
+</div>
 
-<img src="Assets/byteflow-v2.png" alt="ByteFlow" width="112" />
+ByteFlow 是一款 Windows 桌面工具，把应用网速、流量用量和联网开关放在同一个界面里。想知道谁在后台上传、哪个软件占用带宽，或临时让某个应用断网，都可以在列表中查看和操作。
 
-Windows 应用网络监控与联网控制工具，支持实时速率、流量统计及中英文界面。
+## 可以做什么
 
-## 统计、设置与图标
+| 功能 | 说明 |
+| --- | --- |
+| 实时网速 | 每秒更新各应用的下载、上传速率，支持按速率排序 |
+| 应用聚合 | 同一可执行程序的多个进程合并显示，默认隐藏系统进程 |
+| 联网开关 | 允许或阻止指定程序联网，也可一键恢复全部 |
+| 用量统计 | 按应用、日期保存上传和下载用量，查看今天或全部记录 |
+| 数据清理 | 清理单个应用或全部历史统计，不改变联网规则 |
+| 双语界面 | 设置中即时切换中文 / English，并记住选择 |
 
-- 主窗口“统计数据”展示按应用、日期保存的下载、上传和总用量，支持今天 / 全部日期。记录每约 15 秒保存，正常退出再保存一次，异常断电可能丢失最后约 15 秒。
-- 可清理选中应用全部日期记录，或清理全部统计；确认后立即保存，不影响实时速率、本次会话计数和防火墙规则。清理后只累计新流量。
-- 只统计 ByteFlow 运行时观察到并能归属的流量，无法追溯未运行时的历史；跨午夜的采样差额记入采样结束日期。
-- 设置里可即时切换简体中文 / English，选择自动保存。应用名称使用可执行文件自身的描述，Windows 返回的错误可能使用系统语言。
-- 数据保存在 `%LOCALAPPDATA%\ByteFlow\usage.json`，语言保存在同目录 `language.txt`。请只运行一个实例以避免多个实例覆盖统计文件。
-- 使用新版蓝绿流线 B 图标：`Assets/byteflow-v2.png` 和多尺寸 `Assets/byteflow-v2.ico`，已嵌入可执行文件、窗口及主界面。
+## 快速开始
 
-Windows 10/11 原生应用网络监控工具，基于 .NET 8 WPF。
+1. 从 [Releases](https://github.com/hxmsuper/ByteFlow/releases/latest) 下载 `ByteFlow-v0.1.0-win-x64.zip`。
+2. 解压完整文件夹，运行 `ByteFlow.exe`，允许 Windows 管理员权限提示。
+3. 打开网页或开始下载，在应用列表中查看实时速率；选择应用可查看详情。
+4. 关闭应用旁的联网开关即可阻止该程序联网，重新打开开关即可恢复。
 
-- 左侧展示运行中的应用，同一路径的多个进程合并统计，每秒更新上传/下载速度以及本次启动累计流量；右侧查看选中应用详情。
-- 每行及详情面板提供联网开关：绿色开启表示允许联网，灰色关闭表示由本工具阻止联网。无法读取程序路径的应用禁用开关。
-- 默认隐藏 Windows 目录中的进程、会话 0 服务和无法读取路径的进程；勾选“显示系统进程”可查看。分类采用进程路径和会话启发式，第三方后台助手仍可能显示。已断网的规则始终保留以便恢复。
-- 进程列表每 5 秒在后台扫描，名称及路径缓存；网速每秒更新现有行，避免反复重建列表。新启动的软件最多约 5 秒后出现。
-- 采集 TCP / UDP 的 IPv4 / IPv6 系统 ETW 网络事件，不读取通信内容。
-- 按程序文件路径创建 Windows 防火墙入站、出站阻止规则；同程序所有进程均受影响。
-- 支持搜索、单个恢复及恢复全部，重启工具后仍能识别本工具创建的规则。
+**运行环境：Windows 10 / 11，x64。** Release 包已包含 .NET 运行环境，无需另外安装 .NET。联网控制需要 Windows 防火墙处于启用状态。
 
-## 运行
+> 断网规则在退出 ByteFlow 后仍然有效。退出前可点“恢复全部联网”，或下次打开时恢复。恢复操作只删除 ByteFlow 创建的规则。
 
-安装 .NET 8 Desktop Runtime，运行 `ByteFlow.exe` 并允许管理员权限提示。防火墙必须启用。
+## 统计数据与隐私
+
+- 统计覆盖 ByteFlow 运行期间观测到、能够归属到应用的网络流量，不补录软件关闭期间的数据。
+- “本次累计”随本次运行结束；“统计数据”中的记录会保留，约每 15 秒保存一次，正常退出时再次保存。
+- 清理统计不会影响实时速率或防火墙规则；清理后从新流量开始累计。异常退出可能丢失最后约 15 秒记录。
+- 数据保存在本机 `%LOCALAPPDATA%\ByteFlow\`：`usage.json` 是统计记录，`language.txt` 是语言设置。请勿同时运行多个实例。
+- 使用 Windows ETW 采集 TCP / UDP、IPv4 / IPv6 网络事件，不读取通信内容。统计记录保存在本地。
+
+## 使用边界
+
+- 断网按可执行文件路径生效，覆盖该路径的所有进程。浏览器、启动器、更新器使用不同程序文件时，需要分别控制。
+- 系统进程分类使用路径和会话信息，第三方后台助手仍可能显示。无法读取路径的进程只能查看，不能控制。
+- 进程列表约每 5 秒更新；速率每秒更新。没有传输时显示 `0 B/s`，采集未启动或失败时显示 `—` 和状态提示。
+- ETW 统计与网卡计数或运营商计费可能不同，高负载时可能丢失事件。PID 复用可能影响本次会话的累计归属；跨午夜的采样记入采样结束日期。
+- 本机回环、代理、VPN 及既有连接可能受到 Windows 防火墙行为的影响；此工具不作为安全隔离方案。
+
+## 从源码构建
+
+需要 Windows 和 .NET 8 SDK。首次还原依赖需访问 NuGet。
 
 ```powershell
 dotnet restore
 dotnet build -c Release
-dotnet publish -c Release -r win-x64 --self-contained false -o dist
+dotnet publish ByteFlow.csproj -c Release -r win-x64 --self-contained true -o dist/win-x64
 ```
 
-## 统计与控制边界
+以管理员身份运行终端，执行采集验证：
 
-只统计启动后观测到的网络事件，不能恢复历史流量；ETW 统计的是传输层流量，与网卡计数、运营商计费可能不同。网络事件在系统高负载时可能丢失。累计值保留到本次退出。PID 被系统复用时，同一行的累计值可能包含此前进程数据。无法读取路径的系统进程仅可查看。
+```powershell
+dotnet run --project tests/ByteFlow.Smoke.csproj
+```
 
-断网规则关闭窗口后继续生效，重新打开可恢复；恢复全部仅删除 ByteFlow 管理的规则。也可在“高级安全 Windows Defender 防火墙”中删除 ByteFlow- 开头的规则。Windows 防火墙对本机回环、服务代理、VPN、已建立连接的处理可能存在例外，因此不将此工具视为安全隔离措施。浏览器、启动器和更新程序可能运行不同的可执行文件，需要分别控制。
+测试包括统计保存与清理，以及 8 MiB 本机回环传输的进程归属检查，不修改防火墙规则。仅测试统计存储可加 `-- --storage-only`，无需管理员权限。
 
-首次依赖还原需要访问 NuGet。软件不会自动修改系统规则，只有点击断网或恢复按钮才会修改防火墙。
+## English
 
-## 速率采集验证
+ByteFlow shows live download/upload rates for each Windows application and lets you allow or block its internet access. It includes daily usage records, per-app or full history clearing, and a Chinese/English interface.
 
-速率按相邻采样之间的字节差除以实际经过秒数计算，每秒更新，单位为 B/s、KB/s、MB/s。没有流量时为 0 B/s；采集未启动或失败时为“—”，界面底部显示错误。列表列头可按速率排序。
-
-管理员 PowerShell 中运行 `dotnet run --project tests/ByteFlow.Smoke.csproj`，验证 ETW 启动并向本机回环传输 8 MiB，检查收发流量归属本进程；不会修改防火墙规则。内核提供程序必须在访问会话 Source 前启用，测试可覆盖该启动顺序回归。
+Download the **Windows x64 ZIP** from [Releases](https://github.com/hxmsuper/ByteFlow/releases/latest), extract the entire folder, and run `ByteFlow.exe` as administrator. The .NET runtime is included. Windows Firewall must be enabled for network controls. Blocks remain active after closing the app; reopen ByteFlow to restore access. Usage is recorded only while ByteFlow runs and is stored locally.
