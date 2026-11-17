@@ -12,6 +12,9 @@ public sealed record AppRow(int Pid, string Name, string Path, double Down, doub
 {
     public event PropertyChangedEventHandler? PropertyChanged;
     public bool IsSystem { get; init; }
+    private bool favorite;
+    public bool IsFavorite { get => favorite; set { favorite = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("")); } }
+    public string DisplayName => IsFavorite ? "★  " + Name : Name;
     private bool rateAvailable = true;
     public bool RateAvailable { get => rateAvailable; set { rateAvailable = value; PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("")); } }
     public double Down { get; private set; } = Down;
@@ -64,6 +67,7 @@ public partial class MainWindow : Window
         try { usage = new UsageStore(); }
         catch (Exception e) { MessageBox.Show(T("统计数据加载失败：", "Unable to load usage data: ") + e.Message); usage = new UsageStore(System.IO.Path.Combine(UsageStore.DataDirectory, "recovery")); }
         ApplyLanguage();
+        LoadViewOptions();
         Table.ItemsSource = displayed;
         Loaded += (_, _) =>
         {
@@ -146,19 +150,24 @@ public partial class MainWindow : Window
     }
     private void Filter()
     {
-        if (Table == null || Search == null) return;
-        string query = Search.Text.Trim();
+        if (Table == null) return;
         refreshing = true;
-        var visible = rows.Where(r => (ShowSystem?.IsChecked == true || !r.IsSystem || r.Blocked) && $"{r.Name} {r.Pid} {r.Path}".Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+        var visible = rows.Where(r => (ShowSystem?.IsChecked == true || !r.IsSystem || r.Blocked || preferences.Favorites.Contains(r.Key)) && !preferences.Hidden.Contains(r.Key) && (OnlyFavorites?.IsChecked != true || preferences.Favorites.Contains(r.Key))).ToList();
         var keys = visible.Select(r => r.Key).ToHashSet(StringComparer.OrdinalIgnoreCase);
         for (int i = displayed.Count - 1; i >= 0; i--) if (!keys.Contains(displayed[i].Key)) displayed.RemoveAt(i);
         var existing = displayed.ToDictionary(r => r.Key, StringComparer.OrdinalIgnoreCase);
         foreach (var row in visible)
         {
+            row.IsFavorite = preferences.Favorites.Contains(row.Key);
             row.RateAvailable = monitor.IsRunning && monitor.EventCount > 0;
-            if (existing.TryGetValue(row.Key, out var match)) { match.RateAvailable = row.RateAvailable; match.Update(row); }
+            if (existing.TryGetValue(row.Key, out var match)) { match.IsFavorite = row.IsFavorite; match.RateAvailable = row.RateAvailable; match.Update(row); }
             else displayed.Add(row);
         }
+        // WPF's default collection view does not re-sort changed item values automatically.
+        // Refresh only when the user has chosen a sort, retaining the same row objects.
+        var view = System.Windows.Data.CollectionViewSource.GetDefaultView(displayed);
+        if (view.SortDescriptions.Count == 0) { view.SortDescriptions.Add(new SortDescription(nameof(AppRow.IsFavorite), ListSortDirection.Descending)); view.SortDescriptions.Add(new SortDescription(nameof(AppRow.Name), ListSortDirection.Ascending)); }
+        view.Refresh();
         Table.SelectedItem = displayed.FirstOrDefault(r => string.Equals(r.Key, selectedKey, StringComparison.OrdinalIgnoreCase));
         refreshing = false;
         UpdateDetail(Table.SelectedItem as AppRow);
@@ -181,7 +190,6 @@ public partial class MainWindow : Window
         DetailSwitch.IsChecked = row?.Allowed ?? false;
         DetailSwitch.IsEnabled = row?.CanControl ?? false;
     }
-    private void SearchChanged(object sender, TextChangedEventArgs e) => Filter();
     private void SystemFilterChanged(object sender, RoutedEventArgs e) => Filter();
     private void Toggle(object sender, RoutedEventArgs e)
     {
