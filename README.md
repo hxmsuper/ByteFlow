@@ -6,11 +6,11 @@
   <p><a href="https://github.com/hxmsuper/ByteFlow/releases/latest">下载 Windows 版</a> · <a href="#快速开始">快速开始</a> · <a href="#从源码构建">从源码构建</a></p>
 </div>
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/hxmsuper/ByteFlow/main/docs/images/byteflow-main.png" alt="ByteFlow 主界面预览：实时网速与应用联网开关" width="100%" />
+</p>
+
 ByteFlow 是一款 Windows 桌面工具，把应用网速、流量用量和联网开关放在同一个界面里。想知道谁在后台上传、哪个软件占用带宽，或临时让某个应用断网，都可以在列表中查看和操作。
-
-## 界面预览
-
-![ByteFlow 主界面：应用实时上传、下载速率及联网开关](docs/images/byteflow-main.png)
 
 ## 可以做什么
 
