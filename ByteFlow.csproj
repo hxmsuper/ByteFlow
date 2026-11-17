@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">  <PropertyGroup><OutputType>WinExe</OutputType><TargetFramework>net8.0-windows</TargetFramework><UseWPF>true</UseWPF><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings><ApplicationManifest>app.manifest</ApplicationManifest></PropertyGroup>
+  <ItemGroup><PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="3.1.21" /></ItemGroup>
+  <ItemGroup><Compile Remove="tests/**/*.cs" /><Page Remove="tests/**/*.xaml" /></ItemGroup>
+  <PropertyGroup><ApplicationIcon>Assets/byteflow-v2.ico</ApplicationIcon></PropertyGroup>
+  <ItemGroup><Resource Include="Assets/byteflow-v2.ico" /><Resource Include="Assets/byteflow-v2.png" /></ItemGroup>
+</Project>
+
