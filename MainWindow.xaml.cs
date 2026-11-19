@@ -34,6 +34,8 @@ public sealed record AppRow(int Pid, string Name, string Path, double Down, doub
     public string PidLabel => Pid > 0 ? Pid.ToString() : "—";
     public string DownText => RateAvailable ? MainWindow.Format(Down) + "/s" : "—";
     public string UpText => RateAvailable ? MainWindow.Format(Up) + "/s" : "—";
+    public string CompactDownText => "↓ " + DownText;
+    public string CompactUpText => "↑ " + UpText;
     public string TotalText => MainWindow.Format(Bytes);
     public string State => Blocked ? "已断网" : "可联网";
     public string Action => Blocked ? "恢复联网" : "断开网络";
@@ -132,9 +134,11 @@ public partial class MainWindow : Window
         foreach (var path in blocked)
             if (!next.Any(row => string.Equals(row.Path, path, StringComparison.OrdinalIgnoreCase))) next.Add(new(0, System.IO.Path.GetFileNameWithoutExtension(path), path, 0, 0, 0, true) { ProcessCount = 0 });
         rows = next.OrderBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase).ToList();
+        RecordHistory(now);
         Filter();
         Download.Text = monitor.IsRunning ? "↓ " + Format(down) + "/s" : "↓ —";
         Upload.Text = monitor.IsRunning ? "↑ " + Format(up) + "/s" : "↑ —";
+        CompactRates.Text = Download.Text + "    " + Upload.Text;
         Total.Text = T("本次累计 ", "Session ") + Format(total);
         if (!failed)
         {
@@ -189,6 +193,7 @@ public partial class MainWindow : Window
         DetailSwitch.DataContext = row;
         DetailSwitch.IsChecked = row?.Allowed ?? false;
         DetailSwitch.IsEnabled = row?.CanControl ?? false;
+        UpdateChart();
     }
     private void SystemFilterChanged(object sender, RoutedEventArgs e) => Filter();
     private void Toggle(object sender, RoutedEventArgs e)

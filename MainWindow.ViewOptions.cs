@@ -10,6 +10,14 @@ public sealed class ViewPreferences
     public HashSet<string> Favorites { get; set; } = new(StringComparer.OrdinalIgnoreCase);
     public bool OnlyFavorites { get; set; }
     public bool ShowDetails { get; set; }
+    public bool Compact { get; set; }
+    public double FullWidth { get; set; } = 1054;
+    public double FullHeight { get; set; } = 820;
+    public double MiniWidth { get; set; } = 430;
+    public double MiniHeight { get; set; } = 240;
+    public double? Left { get; set; }
+    public double? Top { get; set; }
+    public bool Pinned { get; set; }
 }
 public partial class MainWindow
 {
@@ -30,6 +38,25 @@ public partial class MainWindow
         ShowDetails.IsChecked = false;
         viewOptionsLoaded = true;
         UpdateDetailVisibility();
+        Width = Math.Max(MinWidth, preferences.FullWidth);
+        Height = Math.Max(MinHeight, preferences.FullHeight);
+        Topmost = preferences.Pinned;
+        bool rememberedFavorites = preferences.OnlyFavorites;
+        if (preferences.Compact) ToggleCompact(this, new RoutedEventArgs());
+        OnlyFavorites.IsChecked = rememberedFavorites;
+        var area = SystemParameters.WorkArea;
+        Width = Math.Min(Width, area.Width); Height = Math.Min(Height, area.Height);
+        if (preferences.Left is double left && double.IsFinite(left)) Left = Math.Clamp(left, area.Left, Math.Max(area.Left, area.Right - Width));
+        if (preferences.Top is double top && double.IsFinite(top)) Top = Math.Clamp(top, area.Top, Math.Max(area.Top, area.Bottom - Height));
+        Closing += (_, _) =>
+        {
+            RememberWindowSize();
+            preferences.Compact = compact; preferences.Pinned = Topmost;
+            var bounds = WindowState == WindowState.Normal ? new Rect(Left, Top, Width, Height) : RestoreBounds;
+            preferences.Left = bounds.Left; preferences.Top = bounds.Top;
+            SaveViewOptions();
+        };
+        Table.SizeChanged += (_, _) => FitCompactColumns();
     }
     private void SaveViewOptions()
     {

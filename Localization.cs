@@ -18,6 +18,8 @@ public static class Localization
     }
     public static readonly Dictionary<string, string> Text = new()
     {
+        ["精简模式"]="Compact mode", ["完整模式"]="Full mode", ["速度走势"]="Speed history", ["最近一分钟"]="Last minute", ["最近五分钟"]="Last 5 minutes", ["本次全部"]="Whole session",
+        ["窗口置顶"]="Always on top", ["已置顶"]="Pinned on top", ["点击切换窗口置顶"]="Toggle always on top",
         ["只看关注"]="Favorites only", ["恢复隐藏应用"]="Restore hidden apps", ["显示详情"]="Show details", ["右键应用可关注或隐藏"]="Right-click an app to favorite or hide", ["关注或取消关注"]="Toggle favorite", ["隐藏此应用"]="Hide this app",
         ["应用"]="Application", ["进程数"]="Processes", ["↓ 下载速率"]="↓ Rate", ["↑ 上传速率"]="↑ Rate", ["累计流量"]="Session usage", ["联网开关"]="Internet",
         ["已禁止"]="Blocked", ["允许联网"]="Allowed", ["显示系统进程"]="System processes", ["恢复全部联网"]="Restore all", ["搜索应用、PID 或路径"]="Search apps, PID or path",

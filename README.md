@@ -27,7 +27,7 @@ ByteFlow 是一款 Windows 桌面工具，把应用网速、流量用量和联�
 
 ## 快速开始
 
-1. 从 [Releases](https://github.com/hxmsuper/ByteFlow/releases/latest) 下载 `ByteFlow-v0.1.1-win-x64.zip`。
+1. 从 [Releases](https://github.com/hxmsuper/ByteFlow/releases/latest) 下载 `ByteFlow-v0.1.2-win-x64.zip`。
 2. 解压完整文件夹，运行 `ByteFlow.exe`，允许 Windows 管理员权限提示。
 3. 打开网页或开始下载，在应用列表中查看实时速率；选择应用可查看详情。
 4. 关闭应用旁的联网开关即可阻止该程序联网，重新打开开关即可恢复。
@@ -46,7 +46,12 @@ ByteFlow 是一款 Windows 桌面工具，把应用网速、流量用量和联�
 
 显示偏好保存在同目录 `view.json`，隐藏应用只影响列表，不停止统计或断网。右键应用可关注或隐藏。新版启动时会清理确认所属进程已经退出的 ByteFlow 遗留采集会话，不停止其他软件的会话。
 
+窗口模式、两种模式各自的尺寸、位置与置顶状态会在正常退出时保存，下一次启动恢复。详情默认关闭。
+
 ## 使用边界
+
+- “精简模式”收起工具栏和详情，保留应用列表、速率、累计流量及联网开关；可直接切换只看关注或窗口置顶，再点“完整模式”恢复。
+- 详情中的速度曲线显示上传、下载的历史速率，可选择最近 1 分钟、5 分钟或本次全部。曲线记录保存在本次运行的内存中，关闭详情仍继续记录，退出软件后清空。长时间运行时较早采样会合并以控制内存，近期记录保持每秒采样。
 
 - 断网按可执行文件路径生效，覆盖该路径的所有进程。浏览器、启动器、更新器使用不同程序文件时，需要分别控制。
 - 系统进程分类使用路径和会话信息，第三方后台助手仍可能显示。无法读取路径的进程只能查看，不能控制。
@@ -61,7 +66,8 @@ ByteFlow 是一款 Windows 桌面工具，把应用网速、流量用量和联�
 ```powershell
 dotnet restore
 dotnet build -c Release
-dotnet publish ByteFlow.csproj -c Release -r win-x64 --self-contained true -o dist/win-x64
+dotnet clean ByteFlow.csproj -c Release -r win-x64
+dotnet publish ByteFlow.csproj -c Release -r win-x64 --self-contained true -p:UseSharedCompilation=false -o dist/win-x64
 ```
 
 以管理员身份运行终端，执行采集验证：
